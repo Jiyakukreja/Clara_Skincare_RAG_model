@@ -1,0 +1,170 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  --mint: #eff9f7;
+  --lavender: #f5eff9;
+  --purple: #8c30f5;
+  --purple-hover: #7120d4;
+  --purple-light: #ede0fd;
+  --purple-mid: #c4a0f8;
+  --text-dark: #1a1a2e;
+  --text-mid: #5a5a7a;
+  --text-muted: #9090b0;
+  --border: #e0d0f8;
+  --white: #ffffff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body,
+button,
+input,
+textarea,
+select {
+  font-family: var(--font-lato), "Lato", sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4,
+.brand-name {
+  font-family: var(--font-playfair), "Playfair Display", serif;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  overflow-x: hidden;
+  background: linear-gradient(180deg, #ffffff 0%, #fbf8ff 100%);
+  color: var(--text-dark);
+  font-family: var(--font-lato), "Lato", sans-serif;
+}
+
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  inset: auto;
+  pointer-events: none;
+  z-index: -1;
+  filter: blur(18px);
+  opacity: 0.7;
+}
+
+body::before {
+  top: 4rem;
+  left: -5rem;
+  width: 18rem;
+  height: 18rem;
+  border-radius: 9999px;
+  background: rgba(215, 244, 223, 0.7);
+  animation: clinic-float 14s ease-in-out infinite;
+}
+
+body::after {
+  right: -4rem;
+  bottom: 6rem;
+  width: 20rem;
+  height: 20rem;
+  border-radius: 9999px;
+  background: rgba(134, 92, 255, 0.12);
+  animation: clinic-float 16s ease-in-out infinite reverse;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+::selection {
+  background: rgba(140, 48, 245, 0.18);
+  color: var(--text-dark);
+}
+
+@keyframes clinic-float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(0, -16px, 0) scale(1.05);
+  }
+}
+
+@keyframes clinic-rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 16px, 0) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes message-rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 8px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes clara-bounce {
+  0%,
+  80%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.5;
+  }
+  40% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+}
+
+@keyframes clinic-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(239, 143, 121, 0.0);
+  }
+  50% {
+    box-shadow: 0 0 0 18px rgba(239, 143, 121, 0.06);
+  }
+}
+
+.animate-clinic-rise {
+  animation: clinic-rise 0.6s ease both;
+}
+
+.animate-clinic-pulse {
+  animation: clinic-pulse 5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
