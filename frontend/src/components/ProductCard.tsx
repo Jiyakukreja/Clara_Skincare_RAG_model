@@ -17,7 +17,7 @@ export function ProductCard({ product }: Props) {
       href={productHref}
       target="_blank"
       rel="noopener noreferrer"
-      className="group block rounded-[14px] border border-[var(--border)] bg-white p-4 transition-all duration-150 ease-out hover:-translate-y-0.5 hover:border-[var(--purple)] hover:shadow-[0_12px_26px_rgba(140,48,245,0.12)]"
+      className="group block rounded-[8px] border border-[var(--border)] bg-white p-4 transition-all duration-150 ease-out hover:-translate-y-0.5 hover:border-[var(--purple)] hover:shadow-[0_12px_26px_rgba(140,48,245,0.12)]"
     >
       <div className="mb-3 flex items-start justify-between gap-3">
         <div>
@@ -36,7 +36,7 @@ export function ProductCard({ product }: Props) {
         {formatPrice(product.price, product.currency)}
       </div>
 
-      <p className="mt-3 text-[12px] leading-[1.6] text-[var(--text-mid)]">{product.description}</p>
+      <p className="mt-3 text-[12px] leading-[1.6] text-[var(--text-dark)]">{product.description}</p>
     </Link>
   );
 }

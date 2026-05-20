@@ -133,10 +133,10 @@ export function ChatPanel({ profile, hasProfile, onBack }: Props) {
         </div>
 
         <div className="flex flex-1 items-center justify-center px-6 py-10 text-center">
-          <div className="max-w-sm rounded-[24px] border border-[var(--border)] bg-white p-8 shadow-[0_18px_40px_rgba(26,26,46,0.05)]">
+          <div className="max-w-sm rounded-[8px] border border-[var(--border)] bg-white p-8 shadow-[0_18px_40px_rgba(26,26,46,0.05)]">
             <div className="mb-4 text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--purple)]">Clara Chat</div>
             <h2 className="brand-name text-[34px] italic leading-[1.04] text-[var(--text-dark)]">A routine built around your profile.</h2>
-            <p className="mt-3 text-[14px] leading-[1.7] text-[var(--text-mid)]">Select your skin profile on the left and Clara will open with a complete, clinically guided routine.</p>
+            <p className="mt-3 text-[14px] leading-[1.7] text-[var(--text-dark)]">Select your skin profile on the left and Clara will open with a complete, clinically guided routine.</p>
           </div>
         </div>
       </div>
@@ -149,7 +149,7 @@ export function ChatPanel({ profile, hasProfile, onBack }: Props) {
     <div className="flex h-full flex-col overflow-hidden">
       <div className="flex items-center justify-between border-b border-[var(--border)] bg-white px-5 py-4 lg:px-6">
         <div className="flex items-center gap-3">
-          <button type="button" onClick={onBack} className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-white px-3 py-2 text-[12px] font-bold text-[var(--text-dark)] transition-all duration-150 ease-out hover:border-[var(--purple)] hover:text-[var(--purple)] lg:hidden">
+          <button type="button" onClick={onBack} className="inline-flex items-center gap-2 rounded-[8px] border border-[var(--border)] bg-white px-3 py-2 text-[12px] font-bold text-[var(--text-dark)] transition-all duration-150 ease-out hover:border-[var(--purple)] hover:text-[var(--purple)] lg:hidden">
             <ArrowLeft size={14} />
             Back
           </button>
@@ -179,7 +179,7 @@ export function ChatPanel({ profile, hasProfile, onBack }: Props) {
             onChange={(event) => setInput(event.target.value)}
             placeholder="Ask a follow-up — ingredients, alternatives..."
             rows={1}
-            className="min-h-[48px] flex-1 resize-none rounded-[10px] border border-[var(--border)] bg-white px-4 py-3 text-[14px] text-[var(--text-dark)] outline-none transition-all duration-150 ease-out placeholder:text-[var(--text-muted)] focus:border-[var(--purple-mid)]"
+            className="min-h-[48px] flex-1 resize-none rounded-[8px] border border-[var(--border)] bg-white px-4 py-3 text-[14px] text-[var(--text-dark)] outline-none transition-all duration-150 ease-out placeholder:text-[var(--text-muted)] focus:border-[var(--purple-mid)]"
             onKeyDown={(event) => {
               if (event.key === "Enter" && !event.shiftKey) {
                 event.preventDefault();
@@ -190,7 +190,7 @@ export function ChatPanel({ profile, hasProfile, onBack }: Props) {
           <button
             type="submit"
             disabled={isLoading || !profile}
-            className="inline-flex h-[48px] w-[48px] items-center justify-center rounded-[10px] text-white transition-all duration-150 ease-out hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex h-[48px] w-[48px] items-center justify-center rounded-[8px] text-white transition-all duration-150 ease-out hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-50"
             style={{ background: "var(--purple)" }}
             onMouseEnter={(event) => {
               event.currentTarget.style.background = "var(--purple-hover)";
@@ -210,7 +210,7 @@ export function ChatPanel({ profile, hasProfile, onBack }: Props) {
 function TypingDots() {
   return (
     <div className="flex justify-start">
-      <div className="rounded-[18px_18px_18px_4px] border border-[var(--border)] bg-white px-4 py-3 shadow-[0_8px_24px_rgba(26,26,46,0.05)]">
+      <div className="rounded-[8px] border border-[var(--border)] bg-white px-4 py-3 shadow-[0_8px_24px_rgba(26,26,46,0.05)]">
         <div className="flex items-center gap-2">
           {[0, 1, 2].map((dot) => (
             <span

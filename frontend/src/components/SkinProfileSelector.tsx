@@ -50,7 +50,7 @@ export function SkinProfileSelector({ onStart }: Props) {
         style={{
           background: selected ? "var(--purple)" : "var(--white)",
           borderColor: selected ? "var(--purple)" : "var(--border)",
-          color: selected ? "var(--white)" : "var(--text-mid)",
+          color: selected ? "var(--white)" : "var(--text-dark)",
           fontWeight: selected ? 700 : 400,
           transform: selected ? "scale(1.03)" : "scale(1)",
           boxShadow: selected ? "0 10px 24px rgba(140, 48, 245, 0.18)" : "none",
@@ -66,7 +66,7 @@ export function SkinProfileSelector({ onStart }: Props) {
           if (!selected) {
             event.currentTarget.style.background = "var(--white)";
             event.currentTarget.style.borderColor = "var(--border)";
-            event.currentTarget.style.color = "var(--text-mid)";
+            event.currentTarget.style.color = "var(--text-dark)";
           }
         }}
       >
@@ -111,7 +111,7 @@ export function SkinProfileSelector({ onStart }: Props) {
         type="button"
         disabled={!canStart}
         onClick={() => onStart(profile)}
-        className="w-full rounded-[14px] px-8 py-[14px] text-[14px] font-bold text-white transition-all duration-150 ease-out"
+        className="w-full rounded-[8px] px-8 py-[14px] text-[14px] font-bold text-white transition-all duration-150 ease-out"
         style={{
           background: canStart ? "var(--purple)" : "rgba(140, 48, 245, 0.45)",
           boxShadow: canStart ? "0 14px 28px rgba(140, 48, 245, 0.2)" : "none",

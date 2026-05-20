@@ -25,5 +25,12 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
+    @property
+    def cors_origins(self) -> list[str]:
+        """Allowed browser origins for local and deployed frontends."""
+        configured_origins = [origin.strip() for origin in self.frontend_url.split(",") if origin.strip()]
+        local_origins = ["http://localhost:3000", "http://127.0.0.1:3000"]
+        return list(dict.fromkeys([*configured_origins, *local_origins]))
+
 
 settings = Settings()
