@@ -34,10 +34,11 @@ async def generate_chat_response(
     return ChatResponse(
         answer=result["recommendation"],
         products=result.get("products", []) if include_recommendations else [],
-        safety_warnings=result.get("safety_warnings", []),
+        safety_warnings=result.get("safety_warnings", []) if include_recommendations else [],
         morning_routine=result.get("morning_routine", []) if include_recommendations else [],
         night_routine=result.get("night_routine", []) if include_recommendations else [],
-        lifestyle_tip=result.get("lifestyle_tip", ""),
+        lifestyle_tip=result.get("lifestyle_tip", "") if include_recommendations else "",
         ai_source=result.get("ai_source", "live_gemini"),
         model_used=result.get("model_used", ""),
+        show_details=include_recommendations,
     )

@@ -54,7 +54,7 @@ async def generate_with_gemini(prompt: str) -> GeminiGeneration:
         ],
         "generationConfig": {
             "temperature": 0.35,
-            "maxOutputTokens": 140,
+            "maxOutputTokens": 220,
         },
     }
 

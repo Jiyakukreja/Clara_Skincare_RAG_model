@@ -32,3 +32,4 @@ class ChatResponse(BaseModel):
     lifestyle_tip: str = ""
     ai_source: str = "live_gemini"
     model_used: str = ""
+    show_details: bool = True

@@ -22,6 +22,11 @@ export function MessageBubble({ message, profile }: Props) {
   }
 
   const response = message.response;
+  const showDetails = response?.show_details ?? Boolean(
+    response?.products?.length ||
+      response?.morning_routine?.length ||
+      response?.night_routine?.length,
+  );
 
   return (
     <div className="flex justify-start animate-[message-rise_250ms_ease_both]">
@@ -36,29 +41,31 @@ export function MessageBubble({ message, profile }: Props) {
           {message.content}
         </p>
 
-        <div className="mb-4 flex flex-wrap gap-2">
-          <Pill>{profile.skinType}</Pill>
-          <Pill>{profile.mainConcern}</Pill>
-          {profile.currentActives.map((item) => <Pill key={item}>{item}</Pill>)}
-          <Pill>{profile.ageStage}</Pill>
-          {profile.lifestyle.slice(0, 4).map((item) => <Pill key={item}>{item}</Pill>)}
-        </div>
+        {showDetails ? (
+          <div className="mb-4 flex flex-wrap gap-2">
+            <Pill>{profile.skinType}</Pill>
+            <Pill>{profile.mainConcern}</Pill>
+            {profile.currentActives.map((item) => <Pill key={item}>{item}</Pill>)}
+            <Pill>{profile.ageStage}</Pill>
+            {profile.lifestyle.slice(0, 4).map((item) => <Pill key={item}>{item}</Pill>)}
+          </div>
+        ) : null}
 
-        {response?.safety_warnings?.length ? (
+        {showDetails && response?.safety_warnings?.length ? (
           <div className="mb-4 rounded-[12px] border border-[var(--border)] border-l-[3px] border-l-[var(--purple)] bg-[#fdf6ff] p-[14px_16px]">
             <div className="mb-1 text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--purple)]">Safety Notes</div>
             <p className="text-[13px] leading-[1.7] text-[var(--text-mid)]">⚠ {response.safety_warnings.join(" ")}</p>
           </div>
         ) : null}
 
-        {response?.morning_routine?.length || response?.night_routine?.length ? (
+        {showDetails && (response?.morning_routine?.length || response?.night_routine?.length) ? (
           <div className="mb-4 grid gap-3 md:grid-cols-2">
             <RoutineCard title="Morning" icon="sun" tone="mint" steps={response?.morning_routine ?? []} />
             <RoutineCard title="Night" icon="moon" tone="lavender" steps={response?.night_routine ?? []} />
           </div>
         ) : null}
 
-        {response?.products?.length ? (
+        {showDetails && response?.products?.length ? (
           <div className="mb-4">
             <div className="mb-2 text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--purple)]">Recommended Products</div>
             <div className="grid gap-3 md:grid-cols-2">
@@ -69,7 +76,7 @@ export function MessageBubble({ message, profile }: Props) {
           </div>
         ) : null}
 
-        {response?.lifestyle_tip ? (
+        {showDetails && response?.lifestyle_tip ? (
           <div className="border-l-2 border-[var(--purple)] pl-3 text-[13px] italic leading-[1.7] text-[var(--text-mid)]">
             {response.lifestyle_tip}
           </div>

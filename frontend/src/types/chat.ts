@@ -17,6 +17,7 @@ export type ChatResponse = {
   lifestyle_tip?: string;
   ai_source?: string;
   model_used?: string;
+  show_details?: boolean;
 };
 
 export type ProductRecommendation = {
