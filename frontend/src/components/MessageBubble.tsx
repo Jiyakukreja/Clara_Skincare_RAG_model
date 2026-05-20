@@ -26,6 +26,12 @@ export function MessageBubble({ message, profile }: Props) {
   return (
     <div className="flex justify-start animate-[message-rise_250ms_ease_both]">
       <div className="max-w-[100%] rounded-[18px_18px_18px_4px] border border-[var(--border)] bg-white px-4 py-4 text-[14px] leading-[1.7] text-[var(--text-dark)] shadow-[0_10px_24px_rgba(26,26,46,0.05)] lg:px-5 lg:py-5">
+        {response?.ai_source ? (
+          <div className="mb-3 inline-flex rounded-full bg-[var(--purple-light)] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.08em] text-[#6b21c8]">
+            Live Gemini{response.model_used ? ` · ${response.model_used}` : ""}
+          </div>
+        ) : null}
+
         <p className="mb-4 text-[14px] italic leading-[1.7] text-[var(--text-mid)]">
           {message.content}
         </p>

@@ -3,14 +3,10 @@ from dataclasses import dataclass
 
 import faiss
 import numpy as np
-from openai import AsyncOpenAI
 
-from app.core.config import settings
 from app.models.product import Product
+from app.services.embedding_service import embed_text
 from rag.product_loader import load_products, product_to_text
-
-
-EMBEDDING_MODEL = "text-embedding-3-small"
 
 
 @dataclass
@@ -27,18 +23,11 @@ class ProductVectorStore:
     def __init__(self) -> None:
         self.products = load_products()
         self.index: faiss.IndexFlatIP | None = None
-        self._embedding_client = AsyncOpenAI(api_key=settings.openai_api_key) if settings.openai_api_key else None
 
     async def _embed_texts(self, texts: list[str]) -> np.ndarray:
-        """Create normalized embeddings for FAISS inner-product search."""
-        if self._embedding_client is None:
-            raise RuntimeError("OpenAI API key is required for embedding generation.")
-
-        response = await self._embedding_client.embeddings.create(
-            model=EMBEDDING_MODEL,
-            input=texts,
-        )
-        embeddings = np.array([item.embedding for item in response.data], dtype="float32")
+        """Create normalized Gemini embeddings for FAISS inner-product search."""
+        vectors = [await embed_text(text) for text in texts]
+        embeddings = np.array(vectors, dtype="float32")
         faiss.normalize_L2(embeddings)
         return embeddings
 

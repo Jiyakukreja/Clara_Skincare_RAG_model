@@ -52,11 +52,11 @@ FastAPI Backend
 **AI Stack**
 
 - Gemini API
-- OpenAI API for optional local FAISS embeddings
+- Gemini API for chat generation and embeddings
 - LangGraph
 - LangChain
 - FAISS
-- OpenAI Embeddings
+- Gemini Embeddings
 
 ## Setup Instructions
 
@@ -80,7 +80,7 @@ GEMINI_MODEL=gemini-2.5-flash
 DATABASE_URL=your_database_url_here
 ```
 
-Optional: add `OPENAI_API_KEY` only if you want FAISS semantic embeddings. Without it, the app still works with keyword retrieval over the Clinikally-only catalog.
+The app is Gemini-only. `GEMINI_API_KEY` is required for both generation and RAG embeddings; failures return an API error instead of local fallback text.
 
 ### 2. Frontend
 
@@ -223,7 +223,7 @@ npm run build
 - [x] Frontend dependencies installed in `frontend/node_modules`
 - [x] Product dataset validates as JSON and contains 25 Clinikally-site-only products
 - [x] Backend Python compile check passed
-- [x] Backend recommendation smoke test passed without an API key using fallback retrieval
+- [x] Backend recommendation path requires a live Gemini API response
 - [x] Frontend production build passed
 - [x] Browser smoke test passed at `http://localhost:3000`
 - [x] Gemini embedding check passed with 768 dimensions
@@ -235,4 +235,4 @@ npm run build
 - The backend uses async routes so it can grow into more realistic AI workflows.
 - The frontend starts with a clean chat interface and later adds product cards and routine sections.
 - Gemini-powered recommendation analysis activates when `GEMINI_API_KEY` is set.
-- OpenAI-powered embeddings activate only when `OPENAI_API_KEY` is set. Without it, the backend still demos retrieval using keyword matching.
+- Gemini-powered embeddings are used for FAISS and Pinecone retrieval. No keyword fallback is returned as an AI answer.

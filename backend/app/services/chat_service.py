@@ -27,10 +27,12 @@ async def generate_chat_response(message: str, skin_profile: SkinProfile | None 
     )
 
     return ChatResponse(
-        answer=result.get("recommendation", "I could not generate a recommendation. Please try again."),
+        answer=result["recommendation"],
         products=result.get("products", []),
         safety_warnings=result.get("safety_warnings", []),
         morning_routine=result.get("morning_routine", []),
         night_routine=result.get("night_routine", []),
         lifestyle_tip=result.get("lifestyle_tip", ""),
+        ai_source=result.get("ai_source", "live_gemini"),
+        model_used=result.get("model_used", ""),
     )

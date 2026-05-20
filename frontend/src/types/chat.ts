@@ -15,6 +15,8 @@ export type ChatResponse = {
   morning_routine: string[];
   night_routine: string[];
   lifestyle_tip?: string;
+  ai_source?: string;
+  model_used?: string;
 };
 
 export type ProductRecommendation = {

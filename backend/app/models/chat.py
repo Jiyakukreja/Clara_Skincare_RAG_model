@@ -24,8 +24,10 @@ class ChatResponse(BaseModel):
     """Response body returned by the skincare assistant."""
 
     answer: str
-    products: list[ProductRecommendation] = []
-    safety_warnings: list[str] = []
-    morning_routine: list[str] = []
-    night_routine: list[str] = []
+    products: list[ProductRecommendation] = Field(default_factory=list)
+    safety_warnings: list[str] = Field(default_factory=list)
+    morning_routine: list[str] = Field(default_factory=list)
+    night_routine: list[str] = Field(default_factory=list)
     lifestyle_tip: str = ""
+    ai_source: str = "live_gemini"
+    model_used: str = ""

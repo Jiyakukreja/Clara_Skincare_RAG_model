@@ -21,6 +21,8 @@ class SkincareState(TypedDict, total=False):
     morning_routine: list[str]
     night_routine: list[str]
     lifestyle_tip: str
+    ai_source: str
+    model_used: str
 
 
 def _build_lifestyle_tip(state: SkincareState) -> str:
@@ -36,30 +38,6 @@ def _build_lifestyle_tip(state: SkincareState) -> str:
     if "heavy makeup daily" in summary:
         return "Double cleanse every night so makeup and sunscreen do not build up on the skin barrier."
     return "Stick to a routine you can repeat daily; consistency matters more than complexity."
-
-
-def _build_local_recommendation(state: SkincareState) -> str:
-    products = state.get("products", [])
-    profile_summary = state.get("skin_profile_summary", "").lower()
-    product_names = [product.name for product in products[:3]]
-    product_sentence = (
-        "Suggested products include " + ", ".join(product_names) + "."
-        if product_names
-        else "I could not find matching products right now."
-    )
-
-    routine_parts: list[str] = ["keep cleansing gentle", "moisturize well", "wear sunscreen daily"]
-    if "oily" in profile_summary or "acne" in profile_summary:
-        routine_parts.insert(1, "use one active at a time")
-    if "dry" in profile_summary or "sensitive" in profile_summary:
-        routine_parts.insert(1, "focus on barrier support")
-
-    routine_text = ", ".join(routine_parts[:-1]) + f", and {routine_parts[-1]}"
-    return (
-        f"Based on your profile, {routine_text}. "
-        f"{product_sentence} "
-        "If irritation shows up, simplify the routine and slow down actives."
-    )
 
 
 async def intake_agent(state: SkincareState) -> SkincareState:
@@ -119,26 +97,30 @@ async def recommendation_agent(state: SkincareState) -> SkincareState:
         "- Do not invent products or mention listings outside the provided product context.\n"
         "- Mention safety warnings clearly.\n"
         "- Avoid medical diagnosis and suggest a dermatologist for severe symptoms.\n"
-        "- Write 2 short practical paragraphs, then optionally add product recommendations if useful.\n\n"
+        "- Keep the answer under 55 words.\n"
+        "- Use plain text only: no markdown, no bold text, no headings.\n"
+        "- Write 2 or 3 short sentences.\n"
+        "- Do not write a separate Product Recommendations section; the UI renders product cards separately.\n"
+        "- Do not list product names in the text unless the user explicitly asks for details.\n\n"
         f"User message: {state['user_message']}\n\n"
         f"Skin profile summary: {skin_profile_summary}\n\n"
         f"Product context:\n{product_context}\n\n"
         f"Safety warnings:\n{safety_context}"
     )
 
-    recommendation = _build_local_recommendation(state)
-    if settings.gemini_api_key:
-        try:
-            recommendation = await generate_with_gemini(prompt)
-        except Exception:
-            recommendation = _build_local_recommendation(state)
+    if settings.ai_provider.lower() != "gemini":
+        raise RuntimeError("Only AI_PROVIDER=gemini is supported for this project.")
+
+    generation = await generate_with_gemini(prompt)
 
     return {
         **state,
-        "recommendation": recommendation or "I could not generate a recommendation.",
+        "recommendation": generation.text,
         "morning_routine": morning_routine,
         "night_routine": night_routine,
         "lifestyle_tip": _build_lifestyle_tip(state),
+        "ai_source": "live_gemini",
+        "model_used": generation.model,
     }
 
 
