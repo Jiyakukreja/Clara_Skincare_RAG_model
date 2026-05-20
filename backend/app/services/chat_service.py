@@ -18,20 +18,25 @@ def _format_skin_profile(profile: SkinProfile | None) -> str:
     )
 
 
-async def generate_chat_response(message: str, skin_profile: SkinProfile | None = None) -> ChatResponse:
+async def generate_chat_response(
+    message: str,
+    skin_profile: SkinProfile | None = None,
+    include_recommendations: bool = True,
+) -> ChatResponse:
     """Run the Clara agent graph and return structured chat data."""
     combined_message = f"{_format_skin_profile(skin_profile)}\nUser message: {message}" if skin_profile else message
     result = await run_skincare_graph(
         combined_message,
         skin_profile=skin_profile.model_dump() if skin_profile is not None else None,
+        include_recommendations=include_recommendations,
     )
 
     return ChatResponse(
         answer=result["recommendation"],
-        products=result.get("products", []),
+        products=result.get("products", []) if include_recommendations else [],
         safety_warnings=result.get("safety_warnings", []),
-        morning_routine=result.get("morning_routine", []),
-        night_routine=result.get("night_routine", []),
+        morning_routine=result.get("morning_routine", []) if include_recommendations else [],
+        night_routine=result.get("night_routine", []) if include_recommendations else [],
         lifestyle_tip=result.get("lifestyle_tip", ""),
         ai_source=result.get("ai_source", "live_gemini"),
         model_used=result.get("model_used", ""),

@@ -15,7 +15,11 @@ logger = logging.getLogger(__name__)
 async def chat(request: ChatRequest) -> ChatResponse:
     """Return an AI skincare response for the user's message."""
     try:
-        return await generate_chat_response(request.message, request.skin_profile)
+        return await generate_chat_response(
+            request.message,
+            request.skin_profile,
+            include_recommendations=request.include_recommendations,
+        )
     except Exception as error:
         logger.exception("Live Gemini skincare response failed.")
         raise HTTPException(

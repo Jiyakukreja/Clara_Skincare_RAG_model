@@ -19,7 +19,7 @@ export function ChatPanel({ profile, hasProfile, onBack }: Props) {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
-  const bootstrappedRef = useRef(false);
+  const bootstrappedProfileKeyRef = useRef("");
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -46,18 +46,44 @@ export function ChatPanel({ profile, hasProfile, onBack }: Props) {
     ].join(" ");
   }, [profile]);
 
+  const profileKey = useMemo(() => (profile ? JSON.stringify(profile) : ""), [profile]);
+
+  function shouldIncludeRecommendations(text: string) {
+    const normalized = text.toLowerCase();
+    const recommendationWords = [
+      "routine",
+      "product",
+      "recommend",
+      "suggest",
+      "cleanser",
+      "moisturizer",
+      "sunscreen",
+      "serum",
+      "treatment",
+      "acne",
+      "pigmentation",
+    ];
+    const dietOnlyWords = ["diet", "food", "eat", "nutrition", "water"];
+
+    if (dietOnlyWords.some((word) => normalized.includes(word))) {
+      return recommendationWords.some((word) => normalized.includes(word) && !["acne", "pigmentation"].includes(word));
+    }
+
+    return recommendationWords.some((word) => normalized.includes(word));
+  }
+
   useEffect(() => {
-    if (!profile || bootstrappedRef.current) return;
+    if (!profile || !profileKey || bootstrappedProfileKeyRef.current === profileKey) return;
     const activeProfile = profile;
 
     async function launchConversation() {
-      bootstrappedRef.current = true;
+      bootstrappedProfileKeyRef.current = profileKey;
       setIsTyping(true);
       const userMessage: Message = { id: crypto.randomUUID(), role: "user", content: prompt };
       setMessages([userMessage]);
 
       try {
-        const response = await sendChatMessage(prompt, activeProfile);
+        const response = await sendChatMessage(prompt, activeProfile, true);
         setMessages([userMessage, { id: crypto.randomUUID(), role: "assistant", content: response.answer, response }]);
       } catch (error) {
         setMessages((current) => [
@@ -70,7 +96,7 @@ export function ChatPanel({ profile, hasProfile, onBack }: Props) {
     }
 
     void launchConversation();
-  }, [profile, prompt]);
+  }, [profile, profileKey, prompt]);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -85,7 +111,7 @@ export function ChatPanel({ profile, hasProfile, onBack }: Props) {
     setIsTyping(true);
 
     try {
-      const response = await sendChatMessage(text, profile);
+      const response = await sendChatMessage(text, profile, shouldIncludeRecommendations(text));
       setMessages((current) => [...current, { id: crypto.randomUUID(), role: "assistant", content: response.answer, response }]);
     } catch (error) {
       setMessages((current) => [...current, { id: crypto.randomUUID(), role: "assistant", content: getErrorMessage(error) }]);

@@ -10,13 +10,21 @@ function toBackendSkinProfile(skinProfile: SkinProfile) {
   };
 }
 
-export async function sendChatMessage(message: string, skinProfile: SkinProfile): Promise<ChatResponse> {
+export async function sendChatMessage(
+  message: string,
+  skinProfile: SkinProfile,
+  includeRecommendations = true,
+): Promise<ChatResponse> {
   const response = await fetch("/api/chat", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ message, skin_profile: toBackendSkinProfile(skinProfile) }),
+    body: JSON.stringify({
+      message,
+      skin_profile: toBackendSkinProfile(skinProfile),
+      include_recommendations: includeRecommendations,
+    }),
   });
 
   if (!response.ok) {

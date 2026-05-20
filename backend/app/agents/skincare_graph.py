@@ -23,6 +23,7 @@ class SkincareState(TypedDict, total=False):
     lifestyle_tip: str
     ai_source: str
     model_used: str
+    include_recommendations: bool
 
 
 def _build_lifestyle_tip(state: SkincareState) -> str:
@@ -55,6 +56,9 @@ async def intake_agent(state: SkincareState) -> SkincareState:
 
 async def product_retrieval_agent(state: SkincareState) -> SkincareState:
     """Retrieve products that match the user request."""
+    if not state.get("include_recommendations", True):
+        return {**state, "products": []}
+
     query = f"{state.get('skin_profile_summary', '')}\n{state['user_message']}"
     products = await retrieve_products(query, top_k=5)
     return {**state, "products": products}
@@ -93,7 +97,7 @@ async def recommendation_agent(state: SkincareState) -> SkincareState:
         "You are Clara, a helpful skincare assistant.\n"
         "Important rules:\n"
         "- Answer skincare, routine, lifestyle, and diet questions directly when asked.\n"
-        "- Recommend products only when they are relevant and only from the product context.\n"
+        "- Recommend products only when product context is provided.\n"
         "- Do not invent products or mention listings outside the provided product context.\n"
         "- Mention safety warnings clearly.\n"
         "- Avoid medical diagnosis and suggest a dermatologist for severe symptoms.\n"
@@ -104,7 +108,7 @@ async def recommendation_agent(state: SkincareState) -> SkincareState:
         "- Do not list product names in the text unless the user explicitly asks for details.\n\n"
         f"User message: {state['user_message']}\n\n"
         f"Skin profile summary: {skin_profile_summary}\n\n"
-        f"Product context:\n{product_context}\n\n"
+        f"Product context:\n{product_context or 'No product recommendations requested for this message.'}\n\n"
         f"Safety warnings:\n{safety_context}"
     )
 
@@ -116,8 +120,8 @@ async def recommendation_agent(state: SkincareState) -> SkincareState:
     return {
         **state,
         "recommendation": generation.text,
-        "morning_routine": morning_routine,
-        "night_routine": night_routine,
+        "morning_routine": morning_routine if state.get("include_recommendations", True) else [],
+        "night_routine": night_routine if state.get("include_recommendations", True) else [],
         "lifestyle_tip": _build_lifestyle_tip(state),
         "ai_source": "live_gemini",
         "model_used": generation.model,
@@ -145,10 +149,15 @@ def build_skincare_graph():
 skincare_graph = build_skincare_graph()
 
 
-async def run_skincare_graph(user_message: str, skin_profile: dict | None = None) -> SkincareState:
+async def run_skincare_graph(
+    user_message: str,
+    skin_profile: dict | None = None,
+    include_recommendations: bool = True,
+) -> SkincareState:
     """Run the complete intake-to-recommendation agent workflow."""
     initial_state: SkincareState = {
         "user_message": user_message,
         "skin_profile_summary": str(skin_profile) if skin_profile else "",
+        "include_recommendations": include_recommendations,
     }
     return await skincare_graph.ainvoke(initial_state)

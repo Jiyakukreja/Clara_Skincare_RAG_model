@@ -18,6 +18,7 @@ class ChatRequest(BaseModel):
 
     message: str = Field(..., min_length=1, examples=["I have oily skin and acne. What should I use?"])
     skin_profile: SkinProfile | None = None
+    include_recommendations: bool = True
 
 
 class ChatResponse(BaseModel):
