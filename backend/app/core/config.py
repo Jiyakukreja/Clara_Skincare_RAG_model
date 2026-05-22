@@ -18,6 +18,11 @@ class Settings(BaseSettings):
     qdrant_api_key: str = ""
     embedding_model: str = "gemini-embedding-2"
     embedding_dimension: int = 768
+    external_request_timeout_seconds: float = 10
+    external_request_retries: int = 2
+    retrieval_timeout_seconds: float = 8
+    gemini_generation_timeout_seconds: float = 14
+    chat_timeout_seconds: float = 24
 
     model_config = SettingsConfigDict(
         env_file=".env",

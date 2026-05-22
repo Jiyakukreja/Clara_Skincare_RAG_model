@@ -1,3 +1,4 @@
+import asyncio
 from typing import TypedDict
 
 from langgraph.graph import END, StateGraph
@@ -115,7 +116,10 @@ async def recommendation_agent(state: SkincareState) -> SkincareState:
     if settings.ai_provider.lower() != "gemini":
         raise RuntimeError("Only AI_PROVIDER=gemini is supported for this project.")
 
-    generation = await generate_with_gemini(prompt)
+    generation = await asyncio.wait_for(
+        generate_with_gemini(prompt),
+        timeout=settings.gemini_generation_timeout_seconds,
+    )
 
     return {
         **state,

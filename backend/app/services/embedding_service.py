@@ -44,8 +44,8 @@ async def embed_text(text: str) -> list[float]:
     }
 
     last_error: Exception | None = None
-    async with httpx.AsyncClient(timeout=30) as client:
-        for attempt in range(4):
+    async with httpx.AsyncClient(timeout=settings.external_request_timeout_seconds) as client:
+        for attempt in range(settings.external_request_retries):
             try:
                 response = await client.post(
                     url,
@@ -57,7 +57,7 @@ async def embed_text(text: str) -> list[float]:
             except Exception as error:
                 last_error = error
                 delay = _retry_delay(error, attempt)
-                if delay is None or attempt == 3:
+                if delay is None or attempt == settings.external_request_retries - 1:
                     break
                 await asyncio.sleep(delay)
         else:

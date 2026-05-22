@@ -61,10 +61,10 @@ async def generate_with_gemini(prompt: str) -> GeminiGeneration:
     last_error: Exception | None = None
     response: httpx.Response | None = None
     model_used = ""
-    async with httpx.AsyncClient(timeout=30) as client:
+    async with httpx.AsyncClient(timeout=settings.external_request_timeout_seconds) as client:
         for model in _candidate_models():
             url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
-            for attempt in range(4):
+            for attempt in range(settings.external_request_retries):
                 try:
                     response = await client.post(
                         url,
@@ -78,7 +78,7 @@ async def generate_with_gemini(prompt: str) -> GeminiGeneration:
                 except Exception as error:
                     last_error = error
                     delay = _retry_delay(error, attempt)
-                    if delay is None or attempt == 3:
+                    if delay is None or attempt == settings.external_request_retries - 1:
                         break
                     await asyncio.sleep(delay)
 
