@@ -1,0 +1,12 @@
+
+> ai-skincare-frontend@0.1.0 dev
+> next dev
+
+▲ Next.js 16.2.6 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.29.126:3000
+✓ Ready in 532ms
+
+ GET / 200 in 339ms (next.js: 180ms, application-code: 159ms)
+ GET / 200 in 92ms (next.js: 11ms, application-code: 80ms)
+ POST /api/chat 200 in 7.5s

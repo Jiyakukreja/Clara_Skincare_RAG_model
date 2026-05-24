@@ -30,7 +30,7 @@ button,
 input,
 textarea,
 select {
-  font-family: var(--font-lato), "Lato", sans-serif;
+  font-family: "Lato", "Segoe UI", Arial, sans-serif;
 }
 
 h1,
@@ -38,7 +38,7 @@ h2,
 h3,
 h4,
 .brand-name {
-  font-family: var(--font-playfair), "Playfair Display", serif;
+  font-family: "Playfair Display", Georgia, serif;
 }
 
 body {
@@ -47,7 +47,7 @@ body {
   overflow-x: hidden;
   background: #ffffff;
   color: var(--text-dark);
-  font-family: var(--font-lato), "Lato", sans-serif;
+  font-family: "Lato", "Segoe UI", Arial, sans-serif;
 }
 
 body::before,
