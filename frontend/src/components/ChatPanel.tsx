@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, Loader2, Send } from "lucide-react";
 
 import { sendChatMessage } from "@/lib/api";
+import { createMessageId } from "@/lib/id";
 import type { Message, SkinProfile } from "@/types";
 
 import { MessageBubble } from "@/components/MessageBubble";
@@ -11,10 +12,15 @@ import { MessageBubble } from "@/components/MessageBubble";
 type Props = {
   profile: SkinProfile | null;
   hasProfile: boolean;
+  backendOnline: boolean;
+  backendDetail?: string;
   onBack: () => void;
 };
 
-export function ChatPanel({ profile, hasProfile, onBack }: Props) {
+const OFFLINE_REPLY =
+  "Clara is ready, but the AI backend is offline. Start FastAPI on port 8000 and add GEMINI_API_KEY to backend/.env, then try again.";
+
+export function ChatPanel({ profile, hasProfile, backendOnline, backendDetail, onBack }: Props) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -31,7 +37,11 @@ export function ChatPanel({ profile, hasProfile, onBack }: Props) {
       return error.message;
     }
 
-    return "Gemini is unavailable right now. Please try again.";
+    return "Clara could not respond right now. Please try again.";
+  }
+
+  function appendAssistantMessage(content: string) {
+    setMessages((current) => [...current, { id: createMessageId(), role: "assistant", content }]);
   }
 
   const prompt = useMemo(() => {
@@ -79,16 +89,28 @@ export function ChatPanel({ profile, hasProfile, onBack }: Props) {
     async function launchConversation() {
       bootstrappedProfileKeyRef.current = profileKey;
       setIsTyping(true);
-      const userMessage: Message = { id: crypto.randomUUID(), role: "user", content: prompt };
+      const userMessage: Message = { id: createMessageId(), role: "user", content: prompt };
       setMessages([userMessage]);
+
+      if (!backendOnline) {
+        setMessages([
+          userMessage,
+          { id: createMessageId(), role: "assistant", content: backendDetail || OFFLINE_REPLY },
+        ]);
+        setIsTyping(false);
+        return;
+      }
 
       try {
         const response = await sendChatMessage(prompt, activeProfile, true);
-        setMessages([userMessage, { id: crypto.randomUUID(), role: "assistant", content: response.answer, response }]);
+        setMessages([
+          userMessage,
+          { id: createMessageId(), role: "assistant", content: response.answer, response },
+        ]);
       } catch (error) {
-        setMessages((current) => [
-          ...current,
-          { id: crypto.randomUUID(), role: "assistant", content: getErrorMessage(error) },
+        setMessages([
+          userMessage,
+          { id: createMessageId(), role: "assistant", content: getErrorMessage(error) },
         ]);
       } finally {
         setIsTyping(false);
@@ -96,14 +118,19 @@ export function ChatPanel({ profile, hasProfile, onBack }: Props) {
     }
 
     void launchConversation();
-  }, [profile, profileKey, prompt]);
+  }, [profile, profileKey, prompt, backendOnline, backendDetail]);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const text = input.trim();
     if (!text || isLoading || !profile) return;
 
-    const userMessage: Message = { id: crypto.randomUUID(), role: "user", content: text };
+    if (!backendOnline) {
+      appendAssistantMessage(backendDetail || OFFLINE_REPLY);
+      return;
+    }
+
+    const userMessage: Message = { id: createMessageId(), role: "user", content: text };
     const nextMessages = [...messages, userMessage];
     setMessages(nextMessages);
     setInput("");
@@ -112,9 +139,12 @@ export function ChatPanel({ profile, hasProfile, onBack }: Props) {
 
     try {
       const response = await sendChatMessage(text, profile, shouldIncludeRecommendations(text));
-      setMessages((current) => [...current, { id: crypto.randomUUID(), role: "assistant", content: response.answer, response }]);
+      setMessages((current) => [
+        ...current,
+        { id: createMessageId(), role: "assistant", content: response.answer, response },
+      ]);
     } catch (error) {
-      setMessages((current) => [...current, { id: crypto.randomUUID(), role: "assistant", content: getErrorMessage(error) }]);
+      appendAssistantMessage(getErrorMessage(error));
     } finally {
       setIsLoading(false);
       setIsTyping(false);
@@ -163,6 +193,12 @@ export function ChatPanel({ profile, hasProfile, onBack }: Props) {
 
       <div className="flex-1 overflow-y-auto bg-white px-5 py-5 lg:px-6">
         <div className="space-y-4">
+          {!backendOnline ? (
+            <div className="rounded-[8px] border border-[#f5c2c7] bg-[#fff5f5] px-4 py-3 text-[13px] leading-[1.6] text-[#7f1d1d]">
+              {backendDetail || OFFLINE_REPLY}
+            </div>
+          ) : null}
+
           {messages.map((message) => (
             <MessageBubble key={message.id} message={message} profile={activeProfile} />
           ))}
@@ -177,9 +213,10 @@ export function ChatPanel({ profile, hasProfile, onBack }: Props) {
           <textarea
             value={input}
             onChange={(event) => setInput(event.target.value)}
-            placeholder="Ask a follow-up — ingredients, alternatives..."
+            placeholder={backendOnline ? "Ask a follow-up — ingredients, alternatives..." : "Backend offline — start FastAPI on port 8000"}
             rows={1}
-            className="min-h-[48px] flex-1 resize-none rounded-[8px] border border-[var(--border)] bg-white px-4 py-3 text-[14px] text-[var(--text-dark)] outline-none transition-all duration-150 ease-out placeholder:text-[var(--text-muted)] focus:border-[var(--purple-mid)]"
+            disabled={!backendOnline}
+            className="min-h-[48px] flex-1 resize-none rounded-[8px] border border-[var(--border)] bg-white px-4 py-3 text-[14px] text-[var(--text-dark)] outline-none transition-all duration-150 ease-out placeholder:text-[var(--text-muted)] focus:border-[var(--purple-mid)] disabled:cursor-not-allowed disabled:bg-[#fafafa] disabled:text-[var(--text-muted)]"
             onKeyDown={(event) => {
               if (event.key === "Enter" && !event.shiftKey) {
                 event.preventDefault();
@@ -189,7 +226,7 @@ export function ChatPanel({ profile, hasProfile, onBack }: Props) {
           />
           <button
             type="submit"
-            disabled={isLoading || !profile}
+            disabled={isLoading || !profile || !backendOnline}
             className="inline-flex h-[48px] w-[48px] items-center justify-center rounded-[8px] text-white transition-all duration-150 ease-out hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-50"
             style={{ background: "var(--purple)" }}
             onMouseEnter={(event) => {
@@ -224,5 +261,3 @@ function TypingDots() {
     </div>
   );
 }
-
-// Backend response is rendered directly in MessageBubble.

@@ -92,6 +92,48 @@ npm run dev
 
 Open the frontend at [http://localhost:3000](http://localhost:3000).
 
+### 3. Run both services together
+
+Clara needs **two terminals**:
+
+```bash
+# Terminal 1 — backend (port 8000)
+cd backend
+.venv\Scripts\activate   # macOS/Linux: source .venv/bin/activate
+uvicorn app.main:app --reload --port 8000
+
+# Terminal 2 — frontend (port 3000)
+cd frontend
+npm run dev
+```
+
+Confirm the backend is up:
+
+```bash
+curl http://127.0.0.1:8000/health
+```
+
+You should see `{"status":"ok"}`.
+
+### 4. Deploy frontend (Vercel) + backend
+
+1. Deploy the FastAPI backend (Render, Railway, Azure Container Apps, etc.) and note the public `/chat` URL.
+2. In Vercel → Project → Settings → Environment Variables, set:
+   - `BACKEND_URL` = `https://your-api-host.example.com/chat`
+3. Redeploy the frontend.
+
+Optional: copy `frontend/.env.local.example` to `frontend/.env.local` for local overrides.
+
+## Troubleshooting
+
+| Symptom | Likely cause | Fix |
+| --- | --- | --- |
+| Chat says backend unreachable | Backend not running on port 8000 | Start `uvicorn` (see above) |
+| Chat says Gemini failed / 502 | Missing or invalid `GEMINI_API_KEY` | Set a real key in `backend/.env` |
+| Vercel chat returns 503 | `BACKEND_URL` not set | Add deployed FastAPI `/chat` URL in Vercel env |
+| Next.js “500: This page couldn’t load” | Server crash or proxy misconfiguration | Start backend, check terminal logs, reload |
+| Follow-up questions fail after profile works | Backend stopped or API key quota exceeded | Restart backend and verify Gemini quota |
+
 ## Folder Structure
 
 ```text

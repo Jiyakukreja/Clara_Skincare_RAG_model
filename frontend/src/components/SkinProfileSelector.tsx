@@ -6,6 +6,7 @@ import type { SkinProfile } from "@/types";
 
 type Props = {
   onStart: (profile: SkinProfile) => void;
+  backendOnline?: boolean;
 };
 
 const skinTypes = ["Oily", "Dry", "Combination", "Sensitive", "Normal"];
@@ -23,14 +24,14 @@ const lifestyleOptions = [
   "Vegetarian/Vegan",
 ];
 
-export function SkinProfileSelector({ onStart }: Props) {
+export function SkinProfileSelector({ onStart, backendOnline = true }: Props) {
   const [skinType, setSkinType] = useState("");
   const [mainConcern, setMainConcern] = useState("");
   const [currentActives, setCurrentActives] = useState<string[]>([]);
   const [ageStage, setAgeStage] = useState("");
   const [lifestyle, setLifestyle] = useState<string[]>([]);
 
-  const canStart = Boolean(skinType && mainConcern);
+  const canStart = Boolean(skinType && mainConcern) && backendOnline;
 
   const profile = useMemo<SkinProfile>(
     () => ({ skinType, mainConcern, currentActives, ageStage, lifestyle }),
@@ -106,6 +107,12 @@ export function SkinProfileSelector({ onStart }: Props) {
           <Pill key={option} label={option} selected={lifestyle.includes(option)} onClick={() => toggleMulti(option, lifestyle, setLifestyle)} />
         ))}
       </Section>
+
+      {!backendOnline ? (
+        <p className="text-[13px] leading-[1.6] text-[#7f1d1d]">
+          Start the AI backend on port 8000 before asking Clara.
+        </p>
+      ) : null}
 
       <button
         type="button"
