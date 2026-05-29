@@ -3,10 +3,10 @@ export const maxDuration = 60;
 
 const DEFAULT_LOCAL_BACKEND_URL = "http://127.0.0.1:8000/chat";
 const BACKEND_URL = process.env.BACKEND_URL ?? DEFAULT_LOCAL_BACKEND_URL;
-const BACKEND_TIMEOUT_MS = Number(process.env.BACKEND_TIMEOUT_MS ?? 55_000);
+const BACKEND_TIMEOUT_MS = Math.min(Number(process.env.BACKEND_TIMEOUT_MS ?? 55_000), 55_000);
 
 function isAbortError(error: unknown) {
-  return error instanceof DOMException && error.name === "AbortError";
+  return error instanceof Error && error.name === "AbortError";
 }
 
 function isHtmlPayload(text: string) {
@@ -27,6 +27,13 @@ export async function POST(request: Request) {
       );
     }
 
+    if (!URL.canParse(BACKEND_URL)) {
+      return jsonError(
+        "BACKEND_URL is invalid. Add the full deployed backend /chat URL, for example https://your-api.onrender.com/chat.",
+        500,
+      );
+    }
+
     let body: unknown;
     try {
       body = await request.json();
@@ -37,9 +44,8 @@ export async function POST(request: Request) {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), BACKEND_TIMEOUT_MS);
 
-    let response: Response;
     try {
-      response = await fetch(BACKEND_URL, {
+      const response = await fetch(BACKEND_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -47,6 +53,23 @@ export async function POST(request: Request) {
         },
         signal: controller.signal,
         body: JSON.stringify(body),
+      });
+
+      const payload = await response.text();
+
+      if (isHtmlPayload(payload)) {
+        return jsonError(
+          "The AI backend returned an error page instead of JSON. Check that FastAPI is running and GEMINI_API_KEY is set.",
+          502,
+        );
+      }
+
+      const contentType = response.headers.get("content-type") ?? "application/json; charset=utf-8";
+      return new Response(payload, {
+        status: response.status,
+        headers: {
+          "Content-Type": contentType,
+        },
       });
     } catch (error) {
       const isAbort = isAbortError(error);
@@ -62,22 +85,6 @@ export async function POST(request: Request) {
     } finally {
       clearTimeout(timeout);
     }
-
-    const payload = await response.text();
-
-    if (isHtmlPayload(payload)) {
-      return jsonError(
-        "The AI backend returned an error page instead of JSON. Check that FastAPI is running and GEMINI_API_KEY is set.",
-        502,
-      );
-    }
-
-    return new Response(payload, {
-      status: response.status,
-      headers: {
-        "Content-Type": "application/json; charset=utf-8",
-      },
-    });
   } catch (error) {
     console.error("Chat proxy failed:", error);
     return jsonError("The chat proxy failed unexpectedly. Please try again.", 502);
